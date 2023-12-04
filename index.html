@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Authentication</title>
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f1f1f1;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+#user-list {
+    padding: 10px;
+    border-right: 1px solid #ccc;
+    background-color: #fff;
+}
+.user {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+.user img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button {
+    margin-bottom: 20px;
+}
+
+button {
+    margin: 5px;  
+    font-size: 16px;
+    padding: 10px 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+form {
+    display: none;
+    width: 300px;
+    padding: 20px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+#loginForm, #signupForm {
+        display: none;
+}
+
+h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+input[type="submit"] {
+    cursor: pointer;
+    background-color: #4caf50;
+    color: white;
+}
+
+#account-container {
+    display: none;
+    width: 300px;
+    padding: 20px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#account-photo {
+    display: block;
+    margin: 0 auto 10px;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+#account-container label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+#account-container button {
+    margin-top: 10px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#message {
+    margin-top: 10px;
+    color: red;
+}
+
+    </style>
+</head>
+<body>
+   <div class="wrapper">
+
+    <div id="user-list" style="position: absolute; left: 0; top: 0; bottom: 0; width: 200px; overflow: auto;"></div>
+
+
+        <div class="button">
+            <button id="login">Login</button>
+            <button id="signup">Signup</button>
+        </div>
+        <form id="loginForm">
+            <h2>Login</h2>
+            <input type="text" id="loginFormUsername" placeholder="Email" required>
+            <input type="password" id="loginFormPassword" placeholder="Password" required>
+            <input type="submit" value="Login">
+        </form>
+        <form id="signupForm">
+            <h2>Register</h2>
+            <input type="text" id="signupFormUsername" placeholder="Email" required>
+            <input type="password" id="signupFormPassword" placeholder="Password" required>
+            <input type="submit" value="Register">
+        </form>
+
+        <div id="account-container" style="display:none;">
+            <h2>Account</h2>
+            <!-- Add this inside the account-container div -->
+            <label for="account-photo">Photo:</label>
+            <input type="file" id="account-photo-upload">
+            <img id="account-photo" src="" alt="User Photo" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%; margin-bottom: 10px;">
+            <label for="account-name">Name:</label>
+            <input type="text" id="account-name">
+            <label for="account-gender">Gender:</label>
+            <input type="text" id="account-gender">
+            <label for="account-email">Email:</label>
+            <input type="email" id="account-email">
+            <div id="account-buttons">
+                <button onclick="updateAccount()">Save Changes</button>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div id="message"></div>
+   </div>
+
+   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+   <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+    apiKey: "AIzaSyBUMQ44nhXtyVtc4UF7ilMLkihN3cn8X0Y",
+    authDomain: "login-sinup-29f19.firebaseapp.com",
+    projectId: "login-sinup-29f19",
+    storageBucket: "login-sinup-29f19.appspot.com",
+    messagingSenderId: "663786354251",
+    appId: "1:663786354251:web:f8358fa8049bb7a2013fce",
+    measurementId: "G-CWT9BBW120"
+  };
+
+firebase.initializeApp(firebaseConfig);
+var auth = firebase.auth();
+var db = firebase.firestore();
+var storage = firebase.storage();
+
+// Add this after initializing Firebase
+auth.onAuthStateChanged(user => {
+    if (user) {
+        // User is signed in, show the account page
+        showAccountPage(user);
+
+        // Fetch user data from Firestore
+        db.collection('users').doc(user.uid).get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                document.getElementById('account-name').value = data.name || '';
+                document.getElementById('account-gender').value = data.gender || '';
+                document.getElementById('account-email').value = user.email || '';
+                document.getElementById('account-photo').src = data.photo || '';
+            }
+        });
+    } else {
+        // No user is signed in, show the login form
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('signupForm').style.display = 'none';
+        document.getElementById('account-container').style.display = 'none';
+        document.getElementById('login').style.display = 'inline-block'; // show login button
+        document.getElementById('signup').style.display = 'inline-block'; // show signup button
+    }
+});
+
+document.getElementById('login').addEventListener('click', function() {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('account-container').style.display = 'none';
+    document.getElementById('message').innerText = '';
+});
+
+document.getElementById('signup').addEventListener('click', function() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'block';
+    document.getElementById('account-container').style.display = 'none';
+    document.getElementById('message').innerText = '';
+});
+
+document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var username = document.getElementById('loginFormUsername').value;
+    var password = document.getElementById('loginFormPassword').value;
+
+    // Firebase authentication
+    auth.signInWithEmailAndPassword(username, password)
+        .then(function(userCredential) {
+            var user = userCredential.user;
+            alert('Login successful! Welcome, ' + user.email);
+            showAccountPage(user);
+        })
+        .catch(function(error) {
+            document.getElementById('message').innerText = 'Login failed. ' + error.message;
+        });
+});
+
+document.getElementById('signupForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var username = document.getElementById('signupFormUsername').value;
+    var password = document.getElementById('signupFormPassword').value;
+
+    // Firebase create user
+    auth.createUserWithEmailAndPassword(username, password)
+        .then(function(userCredential) {
+            var user = userCredential.user;
+            alert('Account created! Welcome, ' + user.email);
+            showAccountPage(user);
+        })
+        .catch(function(error) {
+            document.getElementById('message').innerText = 'Signup failed. ' + error.message;
+        });
+});
+
+function showAccountPage(user) {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('account-container').style.display = 'block';
+    document.getElementById('login').style.display = 'none'; // hide login button
+    document.getElementById('signup').style.display = 'none'; // hide signup button
+
+    // Fetch user data from Firestore
+    db.collection('users').doc(user.uid).get().then(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById('account-name').value = data.name || '';
+            document.getElementById('account-gender').value = data.gender || '';
+            document.getElementById('account-email').value = user.email || '';
+        }
+    });
+}
+
+function updateAccount() {
+    var user = auth.currentUser;
+
+    var name = document.getElementById('account-name').value;
+    var gender = document.getElementById('account-gender').value;
+    var photoFile = document.getElementById('account-photo-upload').files[0];
+    if (photoFile) {
+        // Upload the photo to Firebase Storage
+        var photoRef = storage.ref('user-photos/' + user.uid + '/' + photoFile.name);
+        photoRef.put(photoFile).then(snapshot => {
+            // Get the download URL and update Firestore
+            snapshot.ref.getDownloadURL().then(url => {
+                db.collection('users').doc(user.uid).set({
+                    name: name,
+                    gender: gender,
+                    photo: url
+                }, { merge: true })
+                .then(() => {
+                    alert('Account updated successfully!');
+                })
+                .catch(error => {
+                    console.error('Error updating account: ', error);
+                    alert('Failed to update account. Please try again.');
+                });
+            })
+            .catch(error => {
+                console.error('Error getting download URL: ', error);
+                alert('Failed to upload photo. Please try again.');
+            });
+        })
+        .catch(error => {
+            console.error('Error uploading photo: ', error);
+            alert('Failed to upload photo. Please try again.');
+        });
+    } else {
+        // No photo uploaded, just update Firestore
+        db.collection('users').doc(user.uid).set({
+            name: name,
+            gender: gender
+        }, { merge: true })
+        .then(() => {
+            alert('Account updated successfully!');
+        })
+        .catch(error => {
+            console.error('Error updating account: ', error);
+            alert('Failed to update account. Please try again.');
+        });
+    }
+}
+function logout() {
+    auth.signOut();
+    document.getElementById('loginForm').reset();
+    document.getElementById('signupForm').reset();
+    document.getElementById('account-container').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('login').style.display = 'inline-block'; // show login button
+    document.getElementById('signup').style.display = 'inline-block'; // show signup button
+}
+</script>
+<script>
+    document.getElementById('login').addEventListener('click', function() {
+        document.getElementById('signupForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+    });
+
+    document.getElementById('signup').addEventListener('click', function() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('signupForm').style.display = 'block';
+    });
+</script>
+</body>
+</html>
