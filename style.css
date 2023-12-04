@@ -1,0 +1,143 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f1f1f1;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+#user-list {
+    padding: 10px;
+    border-right: 1px solid #ccc;
+    background-color: #fff;
+}
+.user {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+.user img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button {
+    margin-bottom: 20px;
+}
+
+button {
+    margin: 5px;  
+    font-size: 16px;
+    padding: 10px 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+form {
+    display: none;
+    width: 300px;
+    padding: 20px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+#loginForm, #signupForm {
+        display: none;
+}
+
+h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+input[type="submit"] {
+    cursor: pointer;
+    background-color: #4caf50;
+    color: white;
+}
+
+#account-container {
+    margin-top: 200px;
+    display: none;
+    width: 600px;
+    padding: 20px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#account-photo {
+    display: block;
+    margin: 0 auto 10px;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+#account-container label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+#account-container button {
+    margin-top: 10px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#message {
+    margin-top: 10px;
+    color: red;
+}
+#toggleUserList {
+    position: fixed;
+    right: 10px;
+    top: 10px;
+    z-index: 1000;
+}
+
+@media screen and (max-width: 600px) {
+    #user-list {
+        position: absolute;
+        left: -200px !important;
+        transition: left 0.3s ease-in-out;
+    }
+
+    #user-list.show {
+        left: 0 !important;
+    }
+}

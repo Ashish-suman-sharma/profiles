@@ -2,153 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Firebase Authentication</title>
-    <style>
-        * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f1f1f1;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-}
-#user-list {
-    padding: 10px;
-    border-right: 1px solid #ccc;
-    background-color: #fff;
-}
-.user {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    cursor: pointer;
-}
-.user img {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 50%;
-    margin-right: 10px;
-}
-
-
-.wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.button {
-    margin-bottom: 20px;
-}
-
-button {
-    margin: 5px;  
-    font-size: 16px;
-    padding: 10px 15px;
-    cursor: pointer;
-    border: none;
-    border-radius: 5px;
-}
-
-form {
-    display: none;
-    width: 300px;
-    padding: 20px;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-#loginForm, #signupForm {
-        display: none;
-}
-
-h2 {
-    margin-top: 0;
-    color: #333;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-input[type="submit"] {
-    cursor: pointer;
-    background-color: #4caf50;
-    color: white;
-}
-
-#account-container {
-    display: none;
-    width: 300px;
-    padding: 20px;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-#account-photo {
-    display: block;
-    margin: 0 auto 10px;
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-#account-container label {
-    display: block;
-    margin-bottom: 5px;
-    color: #333;
-}
-
-#account-container button {
-    margin-top: 10px;
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#message {
-    margin-top: 10px;
-    color: red;
-}
-#toggleUserList {
-    position: fixed;
-    right: 10px;
-    top: 10px;
-    z-index: 1000;
-}
-
-@media screen and (max-width: 600px) {
-    #user-list {
-        position: absolute;
-        left: -200px !important;
-        transition: left 0.3s ease-in-out;
-    }
-
-    #user-list.show {
-        left: 0 !important;
-    }
-}
-
-    </style>
 </head>
 <body>
    <div class="wrapper">
@@ -161,13 +17,13 @@ input[type="submit"] {
         </div>
         <form id="loginForm">
             <h2>Login</h2>
-            <input type="text" id="loginFormUsername" placeholder="Email" required>
+            <input type="text" id="loginFormUsername" placeholder="Email"autocomplete="off" required>
             <input type="password" id="loginFormPassword" placeholder="Password" required>
             <input type="submit" value="Login">
         </form>
         <form id="signupForm">
             <h2>Register</h2>
-            <input type="text" id="signupFormUsername" placeholder="Email" required>
+            <input type="text" id="signupFormUsername" placeholder="Email" autocomplete="off" required>
             <input type="password" id="signupFormPassword" placeholder="Password" required>
             <input type="submit" value="Register">
         </form>
@@ -179,11 +35,25 @@ input[type="submit"] {
             <input type="file" id="account-photo-upload">
             <img id="account-photo" src="" alt="User Photo" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%; margin-bottom: 10px;">
             <label for="account-name">Name:</label>
-            <input type="text" id="account-name">
+            <input type="text" id="account-name" placeholder="name">
             <label for="account-gender">Gender:</label>
-            <input type="text" id="account-gender">
+            <input type="text" id="account-gender" placeholder="gender">
             <label for="account-email">Email:</label>
-            <input type="email" id="account-email">
+            <input type="email" id="account-email" placeholder="email">
+            <label for="phone">phone no:</label>
+            <input type="text" id="phone" placeholder="Phone Number">
+            <label for="instaId">insta username:</label>
+            <input type="text" id="instaId" placeholder="Instagram ID">
+            <label for="linkedInId">linkedIn username:</label>
+            <input type="text" id="linkedInId" placeholder="LinkedIn ID">
+            <label for="branch">Branch:</label>
+            <input type="text" id="branch" placeholder="Branch">
+            <label for="year">DOB:</label>
+            <input type="text" id="year" placeholder="Date of birth">
+            <label for="regNo">Registration Number:</label>
+            <input type="text" id="regNo" placeholder="Registration Number">
+            <label for="aboutYou">About You:</label>
+            <textarea id="aboutYou" placeholder="About You"></textarea>
             <div id="account-buttons">
                 <button onclick="updateAccount()">Save Changes</button>
                 <button onclick="logout()">Logout</button>
@@ -228,6 +98,13 @@ auth.onAuthStateChanged(user => {
                 document.getElementById('account-gender').value = data.gender || '';
                 document.getElementById('account-email').value = user.email || '';
                 document.getElementById('account-photo').src = data.photo || '';
+                document.getElementById('phone').value = data.phone || '';
+                document.getElementById('instaId').value = data.insta || '';
+                document.getElementById('linkedInId').value = data.linked || '';
+                document.getElementById('branch').value = data.branch || '';
+                document.getElementById('year').value = data.year || '';
+                document.getElementById('regNo').value = data.regno || '';
+                document.getElementById('aboutYou').value = data.about || '';
             }
         });
     } else {
@@ -302,6 +179,13 @@ function showAccountPage(user) {
             document.getElementById('account-name').value = data.name || '';
             document.getElementById('account-gender').value = data.gender || '';
             document.getElementById('account-email').value = user.email || '';
+            document.getElementById('phone').value = data.phone || '';
+            document.getElementById('instaId').value = data.insta || '';
+            document.getElementById('linkedInId').value = data.linked || '';
+            document.getElementById('branch').value = data.branch || '';
+            document.getElementById('year').value = data.year || '';
+            document.getElementById('regNo').value = data.regno || '';
+            document.getElementById('aboutYou').value = data.about || '';
         }
     });
 }
@@ -311,6 +195,15 @@ function updateAccount() {
 
     var name = document.getElementById('account-name').value;
     var gender = document.getElementById('account-gender').value;
+    var email = document.getElementById('account-email').value;
+    var phone = document.getElementById('phone').value;
+    var insta = document.getElementById('instaId').value;
+    var linked = document.getElementById('linkedInId').value;
+    var branch = document.getElementById('branch').value;
+    var year = document.getElementById('year').value;
+    var regno = document.getElementById('regNo').value;
+    var about = document.getElementById('aboutYou').value;
+
     var photoFile = document.getElementById('account-photo-upload').files[0];
     if (photoFile) {
         // Upload the photo to Firebase Storage
@@ -321,6 +214,13 @@ function updateAccount() {
                 db.collection('users').doc(user.uid).set({
                     name: name,
                     gender: gender,
+                    phone: phone,
+                    insta: insta,
+                    linked: linked,
+                    branch: branch,
+                    year: year,
+                    regno: regno,
+                    about: about,
                     photo: url
                 }, { merge: true })
                 .then(() => {
@@ -344,7 +244,15 @@ function updateAccount() {
         // No photo uploaded, just update Firestore
         db.collection('users').doc(user.uid).set({
             name: name,
-            gender: gender
+            gender: gender,
+            phone: phone,
+            insta: insta,
+            linked: linked,
+            branch: branch,
+            year: year,
+            regno: regno,
+            about: about
+
         }, { merge: true })
         .then(() => {
             alert('Account updated successfully!');
@@ -418,6 +326,14 @@ function showOtherAccountPage(userId) {
             document.getElementById('account-name').value = data.name || '';
             document.getElementById('account-gender').value = data.gender || '';
             document.getElementById('account-photo').src = data.photo || '';
+            document.getElementById('phone').value = data.phone || '';
+            document.getElementById('instaId').value = data.insta || '';
+            document.getElementById('linkedInId').value = data.linked || '';
+            document.getElementById('branch').value = data.branch || '';
+            document.getElementById('year').value = data.year || '';
+            document.getElementById('regNo').value = data.regno || '';
+            document.getElementById('aboutYou').value = data.about || '';
+
 
             // Hide the "Save Changes" and "Logout" buttons
             document.getElementById('account-buttons').style.display = 'none';
