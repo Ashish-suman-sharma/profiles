@@ -129,14 +129,31 @@ input[type="submit"] {
     margin-top: 10px;
     color: red;
 }
+#toggleUserList {
+    position: fixed;
+    right: 10px;
+    top: 10px;
+    z-index: 1000;
+}
+
+@media screen and (max-width: 600px) {
+    #user-list {
+        position: absolute;
+        left: -200px !important;
+        transition: left 0.3s ease-in-out;
+    }
+
+    #user-list.show {
+        left: 0 !important;
+    }
+}
 
     </style>
 </head>
 <body>
    <div class="wrapper">
-
+    <button id="toggleUserList">User List</button></div>
     <div id="user-list" style="position: absolute; left: 0; top: 0; bottom: 0; width: 200px; overflow: auto;"></div>
-
 
         <div class="button">
             <button id="login">Login</button>
@@ -358,6 +375,67 @@ function logout() {
     document.getElementById('signup').addEventListener('click', function() {
         document.getElementById('loginForm').style.display = 'none';
         document.getElementById('signupForm').style.display = 'block';
+    });
+</script>
+<script>
+    // Fetch all users from Firestore
+db.collection('users').get().then(querySnapshot => {
+    const userList = document.getElementById('user-list');
+    userList.innerHTML = ''; // Clear the user list
+
+    querySnapshot.forEach(doc => {
+        const data = doc.data();
+
+        // Create a div for each user
+        const userDiv = document.createElement('div');
+        userDiv.className = 'user';
+
+        // Add the user's photo
+        const userImg = document.createElement('img');
+        userImg.src = data.photo || '';
+        userDiv.appendChild(userImg);
+
+        // Add the user's name
+        const userName = document.createElement('span');
+        userName.innerText = data.name || '';
+        userDiv.appendChild(userName);
+
+        // Add a click event to show the user's account
+        userDiv.addEventListener('click', function() {
+            showOtherAccountPage(doc.id);
+        });
+
+        // Add the user div to the user list
+        userList.appendChild(userDiv);
+    });
+});
+
+function showOtherAccountPage(userId) {
+    // Fetch user data from Firestore
+    db.collection('users').doc(userId).get().then(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById('account-name').value = data.name || '';
+            document.getElementById('account-gender').value = data.gender || '';
+            document.getElementById('account-photo').src = data.photo || '';
+
+            // Hide the "Save Changes" and "Logout" buttons
+            document.getElementById('account-buttons').style.display = 'none';
+
+            // Hide the login and signup forms
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'none';
+
+            // Show the account page
+            document.getElementById('account-container').style.display = 'block';
+        }
+    });
+}
+</script>
+<script> 
+    document.getElementById('toggleUserList').addEventListener('click', function() {
+    var userList = document.getElementById('user-list');
+    userList.classList.toggle('show');
     });
 </script>
 </body>
